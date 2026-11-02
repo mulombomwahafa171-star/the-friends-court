@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Friends Court ⚖️</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101016;color:#f5f5f5;font-family:Arial,sans-serif}
+header{text-align:center;padding:35px 15px;background:linear-gradient(135deg,#211b2c,#111116);border-bottom:1px solid #51402c}
+h1{color:#f5d27a;font-size:30px;margin:10px 0}
+header p{color:#bbb}
+nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:15px}
+button{border:0;border-radius:9px;padding:12px 15px;background:#302a38;color:white;font-weight:bold;cursor:pointer}
+button:hover{background:#69502d}
+.active,.gold{background:#a77b32;color:#15120c}
+main{max-width:650px;margin:auto;padding:15px}
+.card{background:#1d1b25;border:1px solid #39313f;border-radius:15px;padding:20px;margin:14px 0}
+h2{color:#f5d27a}
+h3{margin-bottom:8px}
+p{line-height:1.5;color:#ccc}
+input{width:100%;padding:13px;margin:8px 0;background:#111;color:white;border:1px solid #62536b;border-radius:8px}
+select{padding:12px;background:#111;color:white;border:1px solid #62536b;border-radius:8px;width:100%;margin:8px 0}
+.action{width:100%;margin-top:10px;background:#c49a50;color:#17120a}
+.result{padding:12px;background:#292431;border-radius:9px;margin:9px 0}
+.hidden{display:none}
+footer{text-align:center;color:#777;padding:30px}
+</style>
+</head>
+<body>
+
+<header>
+<div style="font-size:45px">⚖️</div>
+<h1>THE FRIENDS COURT</h1>
+<p>Friendship is precious. But some of you need investigating. 😂</p>
+<strong style="color:#f5d27a">ALL RISE! THE COURT IS NOW IN SESSION.</strong>
+</header>
+
+<nav>
+<button class="active" onclick="show('home',this)">🏠 Home</button>
+<button onclick="show('court',this)">⚖️ Court</button>
+<button onclick="show('awards',this)">🏆 Awards</button>
+<button onclick="show('board',this)">📊 Leaderboard</button>
+<button onclick="show('roast',this)">🔥 Roast</button>
+<button onclick="show('truth',this)">❤️ Truth</button>
+</nav>
+
+<main>
+
+<section id="home">
+<div class="card">
+<h2>Welcome to the courtroom!</h2>
+<p>Here, friendships will be tested, secrets will be questioned, and awards will be given. Nobody is safe. 😂</p>
+<h3>👥 First, add your friends</h3>
+<input id="friendName" placeholder="Enter a friend's name">
+<button class="action" onclick="addFriend()">+ Add friend</button>
+<div id="friendsList"></div>
+</div>
+<div class="card">
+<h2>📜 Court rules</h2>
+<p>1. No serious fighting.</p>
+<p>2. Roast with love, not cruelty.</p>
+<p>3. Everyone gets a chance to vote.</p>
+<p>4. The court's decisions are for laughs!</p>
+</div>
+</section>
+
+<section id="court" class="hidden">
+<div class="card">
+<h2>⚖️ THE COURTROOM</h2>
+<p>Who is guilty of the following crime?</p>
+<h3 id="accusation">Who disappears when you need them?</h3>
+<select id="suspect"></select>
+<button class="action" onclick="vote()">CAST YOUR VOTE ⚖️</button>
+<p id="courtMessage"></p>
+<button onclick="nextCase()">Next accusation ➜</button>
+</div>
+</section>
+
+<section id="awards" class="hidden">
+<div class="card">
+<h2>🏆 THE FRIENDSHIP AWARDS</h2>
+<p>Who deserves this prestigious award?</p>
+<h3 id="awardTitle">😂 CEO OF COMEDY</h3>
+<select id="winner"></select>
+<button class="action" onclick="giveAward()">PRESENT THE AWARD 🏆</button>
+<p id="awardMessage"></p>
+<button onclick="nextAward()">Next award ➜</button>
+</div>
+</section>
+
+<section id="board" class="hidden">
+<div class="card">
+<h2>📊 THE LEADERBOARD</h2>
+<p>See who is collecting the most courtroom accusations!</p>
+<div id="scores"></div>
+</div>
+</section>
+
+<section id="roast" class="hidden">
+<div class="card">
+<h2>🔥 THE ROAST ROOM</h2>
+<p>Ready for a friendly roast? Don't take it personally. 😭</p>
+<h3 id="roastText">Press the button if you dare...</h3>
+<button class="action" onclick="roast()">ROAST ME 🔥</button>
+</div>
+</section>
+
+<section id="truth" class="hidden">
+<div class="card">
+<h2>❤️ THE TRUTH CORNER</h2>
+<p>Enough jokes. Let's see how well you know your friends.</p>
+<h3 id="truthText">Who in this group would you trust with your biggest secret?</h3>
+<button class="action" onclick="truth()">NEXT QUESTION ❤️</button>
+</div>
+</section>
+
+</main>
+
+<footer>⚖️ THE FRIENDS COURT · Where friendship meets justice 😂</footer>
+
+<script>
+let friends=JSON.parse(localStorage.getItem("fcFriends")||"[]");
+let votes=JSON.parse(localStorage.getItem("fcVotes")||"{}");
+let awards=JSON.parse(localStorage.getItem("fcAwards")||"[]");
+
+const cases=[
+"Who disappears when you need them?",
+"Who is most likely to arrive late?",
+"Who talks the most but says the least?",
+"Who is the biggest drama queen?",
+"Who is most likely to become famous?",
+"Who is always broke but making plans?",
+"Who falls in love too quickly?",
+"Who would accidentally expose a secret?",
+"Who is the biggest troublemaker?",
+"Who gives the worst advice?"
+];
+
+const awardNames=[
+"😂 CEO OF COMEDY",
+"👑 MAIN CHARACTER",
+"💔 PROFESSIONAL HEARTBREAKER",
+"🤡 BIGGEST CLOWN",
+"💰 FUTURE MILLIONAIRE",
+"❤️ MOST LOYAL FRIEND",
+"🎭 BEST ACTOR",
+"🕵️ MOST SUSPICIOUS FRIEND"
+];
+
+const roasts=[
+"Your Wi-Fi signal has more connections than you.",
+"You have the confidence of a billionaire and the bank balance of a potato.",
+"Your brain is buffering. Please wait.",
+"You're not lazy. You're on energy-saving mode.",
+"If excuses were money, you'd be a millionaire.",
+"Even Google doesn't have answers for your decisions.",
+"You're the reason group chats need mute buttons.",
+"Your plans have a higher cancellation rate than a flight."
+];
+
+const truths=[
+"Who in this group would you trust with your biggest secret?",
+"What is your favourite memory with these friends?",
+"Who makes you laugh even when you're sad?",
+"What is one thing you appreciate about this group?",
+"Who would you call first in an emergency?",
+"What is one thing you wish your friends knew about you?",
+"Which friendship do you hope lasts forever?",
+"What is the funniest thing this group has ever done?"
+  "Who is most likely to be secretly gay but deny it in court? 🌈😭",
+];
+
+let caseIndex=0,awardIndex=0;
+
+function save(){
+localStorage.setItem("fcFriends",JSON.stringify(friends));
+localStorage.setItem("fcVotes",JSON.stringify(votes));
+localStorage.setItem("fcAwards",JSON.stringify(awards));
+}
+
+function addFriend(){
+let input=document.getElementById("friendName");
+let name=input.value.trim();
+if(!name)return alert("Enter a name first!");
+if(friends.some(f=>f.toLowerCase()===name.toLowerCase()))
+return alert("That friend is already on the list!");
+friends.push(name);
+save();
+input.value="";
+refresh();
+}
+
+function refresh(){
+document.getElementById("friendsList").innerHTML=
+friends.length?friends.map(f=>'<div class="result">👤 '+escapeHTML(f)+'</div>').join(""):"<p>No friends added yet.</p>";
+
+["suspect","winner"].forEach(id=>{
+document.getElementById(id).innerHTML=friends.length?
+friends.map(f=>'<option value="'+escapeHTML(f)+'">'+escapeHTML(f)+'</option>').join(""):
+'<option value="">Add friends on the Home page first</option>';
+});
+showScores();
+}
+
+function escapeHTML(s){
+return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function show(id,button){
+document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
+document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+button.classList.add("active");
+if(id==="board")showScores();
+}
+
+function vote(){
+let name=document.getElementById("suspect").value;
+if(!name)return alert("Add some friends first!");
+votes[name]=(votes[name]||0)+1;
+save();
+document.getElementById("courtMessage").textContent=
+"⚖️ Vote recorded! "+name+" has received an accusation. 😂";
+showScores();
+}
+
+function nextCase(){
+caseIndex=(caseIndex+1)%cases.length;
+document.getElementById("accusation").textContent=cases[caseIndex];
+document.getElementById("courtMessage").textContent="";
+}
+
+function giveAward(){
+let name=document.getElementById("winner").value;
+if(!name)return alert("Add some friends first!");
+awards.push({name:name,title:awardNames[awardIndex]});
+save();
+document.getElementById("awardMessage").textContent=
+"🏆 Congratulations "+name+"! You have won "+awardNames[awardIndex]+"!";
+}
+
+function nextAward(){
+awardIndex=(awardIndex+1)%awardNames.length;
+document.getElementById("awardTitle").textContent=awardNames[awardIndex];
+document.getElementById("awardMessage").textContent="";
+}
+
+function showScores(){
+let sorted=[...friends].sort((a,b)=>(votes[b]||0)-(votes[a]||0));
+document.getElementById("scores").innerHTML=sorted.length?
+sorted.map((f,i)=>'<div class="result">'+
+(i===0?"👑":i===1?"🥈":i===2?"🥉":"🏅")+
+" "+escapeHTML(f)+" — "+(votes[f]||0)+" accusations</div>").join(""):
+"<p>Add friends to see the leaderboard.</p>";
+}
+
+function roast(){
+document.getElementById("roastText").textContent=
+roasts[Math.floor(Math.random()*roasts.length)];
+}
+
+function truth(){
+document.getElementById("truthText").textContent=
+truths[Math.floor(Math.random()*truths.length)];
+}
+
+refresh();
+</script>
+</body>
+</html>
