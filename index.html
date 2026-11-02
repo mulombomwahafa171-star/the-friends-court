@@ -121,11 +121,7 @@ footer{text-align:center;color:#777;padding:30px}
 <footer>⚖️ THE FRIENDS COURT · Where friendship meets justice 😂</footer>
 
 <script>
-let friends=JSON.parse(localStorage.getItem("fcFriends")||"[]");
-let votes=JSON.parse(localStorage.getItem("fcVotes")||"{}");
-let awards=JSON.parse(localStorage.getItem("fcAwards")||"[]");
-
-const cases=[
+const cases = [
 "Who disappears when you need them?",
 "Who is most likely to arrive late?",
 "Who talks the most but says the least?",
@@ -135,10 +131,10 @@ const cases=[
 "Who falls in love too quickly?",
 "Who would accidentally expose a secret?",
 "Who is the biggest troublemaker?",
-"Who gives the worst advice?"
+"Who is most likely to surprise everyone with a secret?"
 ];
 
-const awardNames=[
+const awardNames = [
 "😂 CEO OF COMEDY",
 "👑 MAIN CHARACTER",
 "💔 PROFESSIONAL HEARTBREAKER",
@@ -149,122 +145,158 @@ const awardNames=[
 "🕵️ MOST SUSPICIOUS FRIEND"
 ];
 
-const roasts=[
-"Your Wi-Fi signal has more connections than you.",
-"You have the confidence of a billionaire and the bank balance of a potato.",
+const roasts = [
 "Your brain is buffering. Please wait.",
-"You're not lazy. You're on energy-saving mode.",
+"You're on permanent energy-saving mode.",
 "If excuses were money, you'd be a millionaire.",
-"Even Google doesn't have answers for your decisions.",
-"You're the reason group chats need mute buttons.",
-"Your plans have a higher cancellation rate than a flight."
+"Even Google can't explain your decisions.",
+"Your plans have a higher cancellation rate than flights.",
+"You're the reason group chats need mute buttons."
 ];
 
-const truths=[
-"Who in this group would you trust with your biggest secret?",
+const truths = [
+"Who would you trust with your biggest secret?",
 "What is your favourite memory with these friends?",
 "Who makes you laugh even when you're sad?",
-"What is one thing you appreciate about this group?",
+"What do you appreciate about this group?",
 "Who would you call first in an emergency?",
-"What is one thing you wish your friends knew about you?",
-"Which friendship do you hope lasts forever?",
-"What is the funniest thing this group has ever done?"
-  "Who is most likely to be secretly gay but deny it in court? 🌈😭",
+"What do you wish your friends knew about you?",
+"Which friendship do you hope lasts forever?"
 ];
 
-let caseIndex=0,awardIndex=0;
+let friends = [];
+let votes = {};
+let awards = [];
+let caseIndex = 0;
+let awardIndex = 0;
 
-function save(){
-localStorage.setItem("fcFriends",JSON.stringify(friends));
-localStorage.setItem("fcVotes",JSON.stringify(votes));
-localStorage.setItem("fcAwards",JSON.stringify(awards));
+try {
+friends = JSON.parse(localStorage.getItem("fcFriends") || "[]");
+votes = JSON.parse(localStorage.getItem("fcVotes") || "{}");
+awards = JSON.parse(localStorage.getItem("fcAwards") || "[]");
+} catch(e) {}
+
+function save() {
+try {
+localStorage.setItem("fcFriends", JSON.stringify(friends));
+localStorage.setItem("fcVotes", JSON.stringify(votes));
+localStorage.setItem("fcAwards", JSON.stringify(awards));
+} catch(e) {}
 }
 
-function addFriend(){
-  alert("The Add Friend function is working!");
-let input=document.getElementById("friendName");
-let name=input.value.trim();
-if(!name)return alert("Enter a name first!");
-if(friends.some(f=>f.toLowerCase()===name.toLowerCase()))
-return alert("That friend is already on the list!");
+function escapeHTML(value) {
+return String(value).replace(/[&<>"']/g, c => ({
+"&":"&amp;", "<":"&lt;", ">":"&gt;",
+'"':"&quot;", "'":"&#39;"
+}[c]));
+}
+
+function addFriend() {
+const input = document.getElementById("friendName");
+const name = input.value.trim();
+
+if (!name) {
+alert("Please enter your friend's name!");
+return;
+}
+
+if (friends.some(f => f.toLowerCase() === name.toLowerCase())) {
+alert("This friend is already on the list!");
+return;
+}
+
 friends.push(name);
 save();
-input.value="";
+input.value = "";
 refresh();
+
+alert(name + " has joined The Friends Court! 😂");
 }
 
-function refresh(){
-document.getElementById("friendsList").innerHTML=
-friends.length?friends.map(f=>'<div class="result">👤 '+escapeHTML(f)+'</div>').join(""):"<p>No friends added yet.</p>";
+function refresh() {
+const list = document.getElementById("friendsList");
 
-["suspect","winner"].forEach(id=>{
-document.getElementById(id).innerHTML=friends.length?
-friends.map(f=>'<option value="'+escapeHTML(f)+'">'+escapeHTML(f)+'</option>').join(""):
-'<option value="">Add friends on the Home page first</option>';
+list.innerHTML = friends.length
+? friends.map(f => '<div class="result">👤 ' + escapeHTML(f) + '</div>').join("")
+: "<p>No friends added yet. Add your first friend!</p>";
+
+["suspect", "winner"].forEach(id => {
+const select = document.getElementById(id);
+select.innerHTML = friends.length
+? friends.map(f => '<option value="' + escapeHTML(f) + '">' + escapeHTML(f) + '</option>').join("")
+: '<option value="">Add friends first</option>';
 });
+
 showScores();
 }
 
-function escapeHTML(s){
-return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
-
-function show(id,button){
-document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
+function show(id, button) {
+document.querySelectorAll("main section").forEach(s => s.classList.add("hidden"));
 document.getElementById(id).classList.remove("hidden");
-document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
 button.classList.add("active");
-if(id==="board")showScores();
+if (id === "board") showScores();
 }
 
-function vote(){
-let name=document.getElementById("suspect").value;
-if(!name)return alert("Add some friends first!");
-votes[name]=(votes[name]||0)+1;
+function vote() {
+const name = document.getElementById("suspect").value;
+if (!name) return alert("Add friends first!");
+
+votes[name] = (votes[name] || 0) + 1;
 save();
-document.getElementById("courtMessage").textContent=
-"⚖️ Vote recorded! "+name+" has received an accusation. 😂";
+
+document.getElementById("courtMessage").textContent =
+"⚖️ Vote recorded! " + name + " has received an accusation! 😂";
+
 showScores();
 }
 
-function nextCase(){
-caseIndex=(caseIndex+1)%cases.length;
-document.getElementById("accusation").textContent=cases[caseIndex];
-document.getElementById("courtMessage").textContent="";
+function nextCase() {
+caseIndex = (caseIndex + 1) % cases.length;
+document.getElementById("accusation").textContent = cases[caseIndex];
+document.getElementById("courtMessage").textContent = "";
 }
 
-function giveAward(){
-let name=document.getElementById("winner").value;
-if(!name)return alert("Add some friends first!");
-awards.push({name:name,title:awardNames[awardIndex]});
+function giveAward() {
+const name = document.getElementById("winner").value;
+if (!name) return alert("Add friends first!");
+
+awards.push({name, title: awardNames[awardIndex]});
 save();
-document.getElementById("awardMessage").textContent=
-"🏆 Congratulations "+name+"! You have won "+awardNames[awardIndex]+"!";
+
+document.getElementById("awardMessage").textContent =
+"🏆 Congratulations " + name + "! You won " + awardNames[awardIndex] + "!";
 }
 
-function nextAward(){
-awardIndex=(awardIndex+1)%awardNames.length;
-document.getElementById("awardTitle").textContent=awardNames[awardIndex];
-document.getElementById("awardMessage").textContent="";
+function nextAward() {
+awardIndex = (awardIndex + 1) % awardNames.length;
+document.getElementById("awardTitle").textContent = awardNames[awardIndex];
+document.getElementById("awardMessage").textContent = "";
 }
 
-function showScores(){
-let sorted=[...friends].sort((a,b)=>(votes[b]||0)-(votes[a]||0));
-document.getElementById("scores").innerHTML=sorted.length?
-sorted.map((f,i)=>'<div class="result">'+
-(i===0?"👑":i===1?"🥈":i===2?"🥉":"🏅")+
-" "+escapeHTML(f)+" — "+(votes[f]||0)+" accusations</div>").join(""):
-"<p>Add friends to see the leaderboard.</p>";
+function showScores() {
+const sorted = [...friends].sort((a,b) =>
+(votes[b] || 0) - (votes[a] || 0)
+);
+
+document.getElementById("scores").innerHTML = sorted.length
+? sorted.map((f,i) =>
+'<div class="result">' +
+(i === 0 ? "👑" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🏅") +
+" " + escapeHTML(f) + " — " + (votes[f] || 0) +
+" accusations</div>"
+).join("")
+: "<p>Add friends to see the leaderboard.</p>";
 }
 
-function roast(){
-document.getElementById("roastText").textContent=
-roasts[Math.floor(Math.random()*roasts.length)];
+function roast() {
+document.getElementById("roastText").textContent =
+roasts[Math.floor(Math.random() * roasts.length)];
 }
 
-function truth(){
-document.getElementById("truthText").textContent=
-truths[Math.floor(Math.random()*truths.length)];
+function truth() {
+document.getElementById("truthText").textContent =
+truths[Math.floor(Math.random() * truths.length)];
 }
 
 refresh();
