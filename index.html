@@ -54,7 +54,9 @@ footer{text-align:center;color:#777;padding:30px}
 <p>Here, friendships will be tested, secrets will be questioned, and awards will be given. Nobody is safe. 😂</p>
 <h3>👥 First, add your friends</h3>
 <input id="friendName" placeholder="Enter a friend's name">
-<button class="action" onclick="addFriend()">+ Add friend</button>
+<button type="button" id="addFriendBtn" class="action">
++ Add friend
+</button>
 <div id="friendsList"></div>
 </div>
 <div class="card">
@@ -192,6 +194,13 @@ return String(value).replace(/[&<>"']/g, c => ({
 }
 
 function addFriend() {
+  document.addEventListener("DOMContentLoaded", function() {
+  const btn = document.getElementById("addFriendBtn");
+
+  if (btn) {
+    btn.addEventListener("click", addFriend);
+  }
+});
 const input = document.getElementById("friendName");
 const name = input.value.trim();
 
